@@ -1,22 +1,25 @@
-// service-worker.js
-self.addEventListener('install', function(event) {
-    event.waitUntil(
-      caches.open('menu-desplegable-v1').then(function(cache) {
-        return cache.addAll([
-          '/',
-          '/index.html',
-          '/style.css',
-          // Agrega aquí todos los recursos que quieres que estén disponibles offline
-        ]);
+const CACHE_NAME = 'menu-cache-v1';
+const urlsToCache = [
+  '/',
+  'index.html',
+  // Agrega aquí las rutas de tus archivos CSS, JS y cualquier otro recurso estático.
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
       })
-    );
-  });
-  
-  self.addEventListener('fetch', function(event) {
-    event.respondWith(
-      caches.match(event.request).then(function(response) {
-        return response || fetch(event.request);
-      })
-    );
-  });
-  
+  );
+});
